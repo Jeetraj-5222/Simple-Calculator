@@ -1,0 +1,203 @@
+/* ==========================================================
+   Calculator — old-school desk calculator look
+   change the vars in :root to reskin the whole thing
+   ========================================================== */
+
+:root {
+  --bg:           #2a2823;  /* the desk it sits on */
+  --shell:        #e6e2d4;  /* calculator body */
+  --lcd:          #adb69b;  /* screen */
+  --lcd-ink:      #232a1b;
+  --key:          #33322c;  /* number keys */
+  --key-op:       #3a3930;  /* operator keys, barely different */
+  --key-edge:     #1d1c18;
+  --key-fn:       #b8b4a3;  /* AC / backspace / % */
+  --key-fn-edge:  #938e7c;
+  --op-ink:       #e5b04a;  /* operator glyph colour */
+  --accent:       #dfa43c;  /* equals */
+  --accent-edge:  #a97a1e;
+  --danger:       #b0503a;  /* AC — only red on the device */
+  --danger-edge:  #83382a;
+
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Consolas, monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: var(--bg);
+  font-family: var(--mono);
+}
+
+/* ---- the shell ---- */
+
+.calculator {
+  position: relative;
+  width: min(340px, 100%);
+  background: var(--shell);
+  border-radius: 20px;
+  padding: 48px 18px 20px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),   /* moulded top edge   */
+    inset 0 -2px 0 rgba(0, 0, 0, 0.07),        /* moulded bottom edge*/
+    0 4px 10px rgba(0, 0, 0, 0.3),
+    0 24px 48px rgba(0, 0, 0, 0.45);
+}
+
+/* solar panel, because why not */
+.calculator::before {
+  content: "";
+  position: absolute;
+  top: 17px;
+  left: 18px;
+  width: 56px;
+  height: 14px;
+  border-radius: 3px;
+  background: repeating-linear-gradient(90deg, #2c2f24 0 12px, #434733 12px 14px);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* model name */
+.calculator::after {
+  content: "JC-08 · SOLAR";
+  position: absolute;
+  top: 19px;
+  right: 18px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: #8d897a;
+}
+
+/* ---- the screen — recessed, faint LCD texture ---- */
+
+.display {
+  background: var(--lcd);
+  background-image: repeating-linear-gradient(0deg,
+    rgba(0, 0, 0, 0.035) 0 1px, transparent 1px 3px);
+  border-radius: 10px;
+  padding: 14px 16px 16px;
+  margin-bottom: 16px;
+  text-align: right;
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.28),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.prev-operand {
+  min-height: 1.3em;           /* keeps the screen from jumping */
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: rgba(35, 42, 27, 0.55);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.curr-operand {
+  font-size: clamp(1.9rem, 9vw, 2.4rem);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--lcd-ink);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* ---- keys — hard bottom edge is what makes them feel pressable ---- */
+
+.keys {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.key {
+  height: clamp(48px, 13vw, 58px);
+  border: 0;
+  border-radius: 10px;
+  font-family: var(--mono);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #ece9dd;
+  background: var(--key);
+  box-shadow: 0 3px 0 var(--key-edge), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: transform 0.05s ease, box-shadow 0.05s ease, filter 0.05s ease;
+}
+
+.key:hover { filter: brightness(1.1); }
+
+.key:active,
+.key.pressed {                 /* in case script.js toggles .pressed */
+  transform: translateY(3px);
+  box-shadow: 0 0 0 var(--key-edge), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.key:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* function row */
+.key-fn {
+  background: var(--key-fn);
+  color: #34332c;
+  box-shadow: 0 3px 0 var(--key-fn-edge), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.key-fn:active {
+  box-shadow: 0 0 0 var(--key-fn-edge), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* AC is the emergency button, so it gets the red */
+.key[data-action="clear"] {
+  background: var(--danger);
+  color: #f7ece7;
+  box-shadow: 0 3px 0 var(--danger-edge), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+.key[data-action="clear"]:active {
+  box-shadow: 0 0 0 var(--danger-edge), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* operators — same body as numbers, ochre glyphs, slightly bigger */
+.key-op {
+  background: var(--key-op);
+  color: var(--op-ink);
+  font-size: 1.3rem;
+}
+
+.key-zero { grid-column: span 2; }
+
+.key-equals {
+  background: var(--accent);
+  color: #2c2110;
+  box-shadow: 0 3px 0 var(--accent-edge), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.key-equals:active {
+  box-shadow: 0 0 0 var(--accent-edge), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* ---- small screens / short windows ---- */
+
+@media (max-width: 380px) {
+  .calculator { padding: 44px 14px 16px; border-radius: 16px; }
+  .keys { gap: 8px; }
+  .calculator::before { left: 14px; }
+  .calculator::after   { right: 14px; }
+}
+
+@media (max-height: 560px) {
+  .calculator { padding-top: 40px; }
+  .display { margin-bottom: 12px; padding: 10px 14px 12px; }
+  .key { height: 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .key { transition: none; }
+}
